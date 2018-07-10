@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="vis"></div>
+    <div id="content">
+        
+    </div>
+    <script src="d3.js"></script>
+    <script src="build/d3.layout.cloud.js"></script>
+    <script src="./jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+        function UrlSearch() { //获取url后参数
+        var name,value;
+        var str=decodeURI(location.href); //取得整个地址栏
+        // console.log(str)
+        var num=str.indexOf("?")
+        str=str.substr(num+1); //取得所有参数   stringvar.substr(start [, length ]
+
+        var arr=str.split("&"); //各个参数放到数组里
+            // console.log(arr)
+        for(var i=0;i < arr.length;i++){
+                num=arr[i].indexOf("=");
+                if(num>0){
+                    name=arr[i].substring(0,num);
+                    value=arr[i].substr(num+1);
+                    // console.log('name:'+name)
+                    // console.log('value:'+value)
+                    this[name]=value;
+
+                }
+        }
+        return this;
+        
+        }   
+
+        var title=UrlSearch()["title"];
+        var newsDate=UrlSearch()["date"]; 
+        document.write('<scr'+'ipt src="../output/'+date+'/'+title+'_keywords.txt"></scr'+'ipt>');
+        document.write('<scr'+'ipt src="../output/'+date+'/'+title+'_segment.txt"></scr'+'ipt>');
+       
+    </script>
+
+    <script>
+    
+
+        var s='代表团 以色列 学生 创业 合作 大学 会见 创新 学院 中心 重点学科 研究 高校 跨学科 国际 希望 项目 教育 副校长 培养 '
+        var slist=s.split(' ')
+        
+        displayCloud(keywords)
+        $("#content").empty().append(segment)
+
+
+
+        function displayCloud(slist){
+            var fill = d3.scale.category20();
+        
+            var layout = d3.layout.cloud()
+                .size([500, 500])
+                .words(slist.map(function(d) {
+                return {text: d, size: 10 + Math.random() * 90};
+                }))
+                .padding(5)
+                .rotate(function() { return ~~((Math.random() * 10)-5) * 12; })
+                .font("Impact")
+                .fontSize(function(d) { return d.size; })
+                .on("end", draw);
+            
+            layout.start();
+            
+            function draw(words) {
+            d3.select("#vis").append("svg")
+                .attr("width", layout.size()[0])
+                .attr("height", layout.size()[1])
+                .append("g")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", function(d, i) { return fill(i); })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+            }
+        }
+    </script>
+</body>
+</html>

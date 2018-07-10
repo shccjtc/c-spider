@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        div{
+            display: block
+        }
+        ul,ol,li{
+            list-style: none;
+            float: left;
+        }
+        a:link, a:visited, a:hover, a:active {
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .listNews{
+            width: 740px;
+            margin: 20px auto;
+        }
+        .listNews ul{
+            display: block;
+        }
+        .listNews ul li{
+            width: 720px;
+            height: 36px;
+            line-height: 36px;
+            padding-left: 20px;
+            font-size: 16px;
+            overflow: hidden;
+        }
+        .listNews ul li a{
+            color: #333;
+            width: 560px;
+            display: block;
+            height: 36px;
+            overflow: hidden;
+            float: left;
+        }
+        .listNews ul li a:hover{
+            color: #0182c6;
+              font-weight: bold;
+        }
+        .listNews ul li span{
+            color: #666;
+            display: block;
+            float: right;
+            width: 110px;
+        }
+        .center a:hover{
+            color: red;
+        }
+     
+        p{
+            display: block;
+            width:400px;
+            margin: 20px auto;
+            font-size: 30px
+        }
+
+    </style>
+</head>
+<body>
+
+    <p>数据分词展示</p>
+    <div class="listNews">
+        <ul>
+        </ul>
+        <div class="center">
+            <table>
+                <tr>
+                    <td id='indexIfo'></td>
+                    <td>
+                        <div>
+                            <a id='firstPage'>首页</a>
+                            <a id='forwardPage'>上页</a>
+                            <a id='nextPage'>下页</a>
+                            <a id='lastPage'>尾页</a>
+                            <input id='movePage' type="button" value="转到">
+                            <input id='moveText' type="text">
+                            页
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    
+
+    <script src="./jquery-1.10.2.js"></script>
+    <script src="../index.txt"></script>
+    <script>
+
+        function getNewsPage(dir){
+            var newsPage=[]
+            var list=[]
+            var dLength=dir.length
+            var newsPerpage=15
+            var pageNum=parseInt(dLength/newsPerpage)
+
+
+            if(dLength%newsPerpage!=0) pageNum++
+
+
+            // console.log(pageNum)
+            for(var i=0;i<dLength;i++){
+                list.push(dir.pop())
+                if((i+1)%newsPerpage==0||i==dLength-1){
+                    newsPage.push(list)
+                    list=[]
+                }
+            }
+            return {
+                "newsPage":newsPage,
+                "newsNum":dLength,
+                "pageNum":pageNum
+            }
+            // console.log(dir.pop())
+            // console.log(dir.pop())
+        }
+        
+        function displayNews(newsIfo,index){
+            nlist=newsIfo.newsPage[index]
+            var $ul=$('.listNews > ul')
+            $ul.empty()
+            var s=''
+            for(var i=0;i<nlist.length;i++){
+                s=
+                '<li>'+
+                    '<a href="./showNews.html?title='+nlist[i].title+'&date='+nlist[i].date+'">'+nlist[i].title+'</a>'+
+                    '<span>'+nlist[i].date+'</span>'+
+                '</li>'
+                $ul.append(s)
+            }
+
+            var $indexIfo=$('#indexIfo')
+            console.log($indexIfo)
+            $indexIfo.empty().append('共'+newsIfo.newsNum+'条  '+(index+1)+'/'+newsIfo.pageNum)
+        }
+
+        function modifyPage(num,pageNum){
+            if(num<0) num=0;
+            if(num>=pageNum) num=pageNum-1
+            return num
+        }
+
+        function bindModify(){
+            var _this=this
+            var $first=$('#firstPage')
+            var $forward=$('#forwardPage')
+            var $next=$('#nextPage')
+            var $last=$('#lastPage')
+            var $move=$('#movePage')
+
+            $first.on('click',function(){
+
+                _this.currentPage=0;
+                _this.currentPage=_this.modifyPage(_this.currentPage,_this.newsIfo.pageNum)
+                _this.displayNews(_this.newsIfo,_this.currentPage)
+            })
+
+
+            $forward.on('click',function(){
+
+                _this.currentPage--;
+                _this.currentPage=_this.modifyPage(_this.currentPage,_this.newsIfo.pageNum)
+                _this.displayNews(_this.newsIfo,_this.currentPage)
+            })
+
+            $next.on('click',function(){
+
+                _this.currentPage++;
+                _this.currentPage=_this.modifyPage(_this.currentPage,_this.newsIfo.pageNum)
+                _this.displayNews(_this.newsIfo,_this.currentPage)
+            })
+
+            $last.on('click',function(){
+
+                _this.currentPage=_this.newsIfo.pageNum-1;
+                _this.currentPage=_this.modifyPage(_this.currentPage,_this.newsIfo.pageNum)
+                _this.displayNews(_this.newsIfo,_this.currentPage)
+            })
+            $move.on('click',function(){
+                var num =parseInt($('#moveText').val())
+                num--
+                _this.currentPage=num;
+                _this.currentPage=_this.modifyPage(_this.currentPage,_this.newsIfo.pageNum)
+                _this.displayNews(_this.newsIfo,_this.currentPage)
+            })
+            
+            
+        }
+
+        var currentPage=0
+        var newsIfo=getNewsPage(dir)
+        console.log(newsIfo)
+        displayNews(newsIfo,currentPage)
+        bindModify()
+
+        
+        // $('.btn').on('click',function(){
+        //     console.log($('#f0').val())
+        //     console.log(document.getElementById('f0').files[0])
+            
+        //     // $.ajax({
+        //     //     type:'GET',
+        //     //     url:'../output/'+$('.datelabel').val()+'/direct.txt',
+        //     //     dataType:'string'
+        //     // }).done(function(data){
+        //     //     console.log(data)
+        //     // }).fail(function(err){
+        //     //     console.log('failed')
+        //     // })
+        // })
+
+
+
+
+        
+        
+        
+
+    </script>
+
+
+
+
+
+
+</body>
+</html>
